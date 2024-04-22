@@ -347,6 +347,8 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	edict_t	*bolt;
 	trace_t	tr;
 
+	//gi.LocCenter_Print(self, "Fire Blaster.\n");
+
 	VectorNormalize (dir);
 
 	bolt = G_Spawn();
