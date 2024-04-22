@@ -626,6 +626,13 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.max_cells		= 200;
 	client->pers.max_slugs		= 50;
 
+	// Element
+	client->pers.max_normal		= 10;
+	client->pers.max_fire		= 10;
+	client->pers.max_ice		= 10;
+	client->pers.max_electric	= 10;
+	client->pers.max_rock		= 10;
+
 	client->pers.connected = true;
 }
 

@@ -96,6 +96,16 @@ typedef enum
 	WEAPON_FIRING
 } weaponstate_t;
 
+// Weapon element type
+typedef enum
+{
+	WEAPON_NORMAL,
+	WEAPON_FIRE,
+	WEAPON_ICE,
+	WEAPON_ELETRIC,
+	WEAPON_ROCK
+} weaponelement_t;
+
 typedef enum
 {
 	AMMO_BULLETS,
@@ -106,6 +116,15 @@ typedef enum
 	AMMO_SLUGS
 } ammo_t;
 
+// Element pickup
+typedef enum
+{
+	ELEMENT_NORMAL,
+	ELEMENT_FIRE,
+	ELEMENT_ICE,
+	ELEMENT_ELETRIC,
+	ELEMENT_ROCK
+} element_t;
 
 //deadflag
 #define DEAD_NO					0
@@ -250,6 +269,7 @@ typedef struct gitem_s
 
 	int			quantity;		// for ammo how much, for weapons how much is used per shot
 	char		*ammo;			// for weapons
+	char		*element_ammo;	// for weapon element
 	int			flags;			// IT_* flags
 
 	int			weapmodel;		// weapon model index (for weapons)
@@ -851,6 +871,13 @@ typedef struct
 	int			max_grenades;
 	int			max_cells;
 	int			max_slugs;
+
+	// Element Ammo capacities
+	int			max_normal;
+	int			max_fire;
+	int			max_ice;
+	int			max_electric;
+	int			max_rock;
 
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;

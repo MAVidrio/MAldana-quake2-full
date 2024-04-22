@@ -813,7 +813,7 @@ BLASTER / HYPERBLASTER
 ======================================================================
 */
 
-void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int effect)
+void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int effect, int element)
 {
 	vec3_t	forward, right;
 	vec3_t	start;
@@ -829,17 +829,34 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
+	switch (element)
+	{
+		case 1:			// Element 1: Fire
+			fire_blaster(ent, start, forward, damage, 1000, EF_ROCKET, hyper);
 
-	start[0] += right[0] * 10;
-	start[1] += right[1] * 10;
-	start[2] += right[2] * 10;
-	fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
+			start[0] += right[0] * 10;
+			start[1] += right[1] * 10;
+			start[2] += right[2] * 10;
+			fire_blaster(ent, start, forward, damage, 1000, EF_ROCKET, hyper);
 
-	start[0] -= right[0] * 20;
-	start[1] -= right[1] * 20;
-	start[2] -= right[2] * 20;
-	fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
+			start[0] -= right[0] * 20;
+			start[1] -= right[1] * 20;
+			start[2] -= right[2] * 20;
+			fire_blaster(ent, start, forward, damage, 1000, EF_ROCKET, hyper);
+
+			break;
+		case 2:			// Element 2: Ice
+			fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
+			break;
+		case 3:			// Element 3: Eletric
+		case 4:			// Element 4: Rock
+		default:		// Element 5 (Default): Normal
+			fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
+			break;
+	}
+
+	//fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
+
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -862,7 +879,7 @@ void Weapon_Blaster_Fire (edict_t *ent)
 		damage = 15;
 	else
 		damage = 10;
-	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
+	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER, 0);
 	ent->client->ps.gunframe++;
 }
 
@@ -914,7 +931,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 				damage = 15;
 			else
 				damage = 20;
-			Blaster_Fire (ent, offset, damage, true, effect);
+			Blaster_Fire (ent, offset, damage, true, effect, 0);
 			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]--;
 
