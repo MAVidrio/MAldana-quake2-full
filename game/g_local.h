@@ -232,11 +232,11 @@ typedef struct
 // gitem_t->flags
 #define	IT_WEAPON		1		// use makes active weapon
 #define	IT_AMMO			2
-#define IT_ELEMENT		3
 #define IT_ARMOR		4
 #define IT_STAY_COOP	8
 #define IT_KEY			16
 #define IT_POWERUP		32
+#define IT_ELEMENT		64
 
 // gitem_t->weapmodel for weapons indicates model index
 #define WEAP_BLASTER			1 

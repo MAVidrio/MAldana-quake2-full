@@ -574,19 +574,19 @@ qboolean Add_Element(edict_t* ent, gitem_t* item, int count)
 
 qboolean Pickup_Element(edict_t* ent, edict_t* other)
 {
-	int			oldcount;
 	int			count;
-	qboolean	weapon;
+	int			oldcount = other->client->pers.inventory[ITEM_INDEX(ent->item)];
+	qboolean	weapon = (ent->item->flags & IT_WEAPON);
+	qboolean    element = (ent->item->flags & IT_ELEMENT);
 
-	weapon = (ent->item->flags & IT_WEAPON);
+	gi.dprintf("Picking up item: %s, Weapon flag: %d, Element flag: %d, Old count: %d\n", ent->item->classname, weapon, element, oldcount);
+
 	if ((weapon) && ((int)dmflags->value & DF_INFINITE_AMMO))
 		count = 1000;
 	else if (ent->count)
 		count = ent->count;
 	else
 		count = ent->item->quantity;
-
-	oldcount = other->client->pers.inventory[ITEM_INDEX(ent->item)];
 
 	if (!Add_Element(other, ent->item, count))
 		return false;
@@ -597,8 +597,6 @@ qboolean Pickup_Element(edict_t* ent, edict_t* other)
 			other->client->newweapon = ent->item;
 	}
 
-	if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->value))
-		SetRespawn(ent, 30);
 	return true;
 }
 
