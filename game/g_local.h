@@ -232,6 +232,7 @@ typedef struct
 // gitem_t->flags
 #define	IT_WEAPON		1		// use makes active weapon
 #define	IT_AMMO			2
+#define IT_ELEMENT		3
 #define IT_ARMOR		4
 #define IT_STAY_COOP	8
 #define IT_KEY			16
@@ -269,7 +270,6 @@ typedef struct gitem_s
 
 	int			quantity;		// for ammo how much, for weapons how much is used per shot
 	char		*ammo;			// for weapons
-	char		*element_ammo;	// for weapon element
 	int			flags;			// IT_* flags
 
 	int			weapmodel;		// weapon model index (for weapons)

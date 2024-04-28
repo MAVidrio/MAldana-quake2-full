@@ -24,7 +24,7 @@ qboolean	Pickup_Weapon (edict_t *ent, edict_t *other);
 void		Use_Weapon (edict_t *ent, gitem_t *inv);
 void		Drop_Weapon (edict_t *ent, gitem_t *inv);
 
-void Weapon_Blaster (edict_t *ent);
+void Weapon_Blaster (edict_t *ent, weaponelement_t *wele);
 void Weapon_Shotgun (edict_t *ent);
 void Weapon_SuperShotgun (edict_t *ent);
 void Weapon_Machinegun (edict_t *ent);
@@ -535,7 +535,97 @@ void Drop_Ammo (edict_t *ent, gitem_t *item)
 	ValidateSelectedItem (ent);
 }
 
+//======================================================================
 
+// Add element ammo logic
+qboolean Add_Element(edict_t* ent, gitem_t* item, int count)
+{
+	int			index;
+	int			max;
+
+	if (!ent->client)
+		return false;
+
+	if (item->tag == ELEMENT_NORMAL)
+		max = ent->client->pers.max_normal;
+	else if (item->tag == ELEMENT_FIRE)
+		max = ent->client->pers.max_fire;
+	else if (item->tag == ELEMENT_ICE)
+		max = ent->client->pers.max_ice;
+	else if (item->tag == ELEMENT_ELETRIC)
+		max = ent->client->pers.max_electric;
+	else if (item->tag == ELEMENT_ROCK)
+		max = ent->client->pers.max_rock;
+	else
+		return false;
+
+	index = ITEM_INDEX(item);
+
+	if (ent->client->pers.inventory[index] == max)
+		return false;
+
+	ent->client->pers.inventory[index] += count;
+
+	if (ent->client->pers.inventory[index] > max)
+		ent->client->pers.inventory[index] = max;
+
+	return true;
+}
+
+qboolean Pickup_Element(edict_t* ent, edict_t* other)
+{
+	int			oldcount;
+	int			count;
+	qboolean	weapon;
+
+	weapon = (ent->item->flags & IT_WEAPON);
+	if ((weapon) && ((int)dmflags->value & DF_INFINITE_AMMO))
+		count = 1000;
+	else if (ent->count)
+		count = ent->count;
+	else
+		count = ent->item->quantity;
+
+	oldcount = other->client->pers.inventory[ITEM_INDEX(ent->item)];
+
+	if (!Add_Element(other, ent->item, count))
+		return false;
+
+	if (weapon && !oldcount)
+	{
+		if (other->client->pers.weapon != ent->item && (!deathmatch->value || other->client->pers.weapon == FindItem("blaster")))
+			other->client->newweapon = ent->item;
+	}
+
+	if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->value))
+		SetRespawn(ent, 30);
+	return true;
+}
+
+void Drop_Element(edict_t* ent, gitem_t* item)
+{
+	edict_t* dropped;
+	int		index;
+
+	index = ITEM_INDEX(item);
+	dropped = Drop_Item(ent, item);
+	if (ent->client->pers.inventory[index] >= item->quantity)
+		dropped->count = item->quantity;
+	else
+		dropped->count = ent->client->pers.inventory[index];
+
+	if (ent->client->pers.weapon &&
+		ent->client->pers.weapon->tag == AMMO_GRENADES &&
+		item->tag == AMMO_GRENADES &&
+		ent->client->pers.inventory[index] - dropped->count <= 0) {
+		gi.cprintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
+		G_FreeEdict(dropped);
+		return;
+	}
+
+	ent->client->pers.inventory[index] -= dropped->count;
+	ValidateSelectedItem(ent);
+}
 //======================================================================
 
 void MegaHealth_think (edict_t *self)
@@ -1537,6 +1627,32 @@ always owned, never in the world
 		NULL,
 		0,
 /* precache */ "sprites/s_bfg1.sp2 sprites/s_bfg2.sp2 sprites/s_bfg3.sp2 weapons/bfg__f1y.wav weapons/bfg__l1a.wav weapons/bfg__x1b.wav weapons/bfg_hum.wav"
+	},
+
+	//
+	// Element ITEMS
+	//
+/*MODDED element_normal(.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"element_normal",
+		Pickup_Element,
+		NULL,
+		Drop_Element,
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/adrenal/tris.md2", EF_ROTATE,
+		NULL,
+		/* icon */		"a_shells",
+		/* pickup */	"Normal",
+		/* width */		3,
+				1,
+				NULL,
+				IT_ELEMENT,
+				0,
+				NULL,
+				ELEMENT_NORMAL,
+				/* precache */ ""
 	},
 
 	//

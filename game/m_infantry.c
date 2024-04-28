@@ -306,6 +306,7 @@ void infantry_dead (edict_t *self)
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, -8);
 	self->movetype = MOVETYPE_TOSS;
+	self->item = FindItem("ammo_cells");
 	self->svflags |= SVF_DEADMONSTER;
 	gi.linkentity (self);
 
@@ -423,6 +424,19 @@ void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 		self->monsterinfo.currentmove = &infantry_move_death3;
 		gi.sound (self, CHAN_VOICE, sound_die2, 1, ATTN_NORM, 0);
 	}
+
+	// Change this to element fire for Enforcers
+	edict_t* element;
+	element = G_Spawn();
+	element->classname = "element_normal";
+	element->item = FindItem("Normal");
+	VectorCopy(self->s.origin, element->s.origin);
+	element->s.origin[2] += 16;
+	element->solid = SOLID_TRIGGER;
+	element->touch = Touch_Item;
+	element->nextthink = level.time + 120;
+	element->think = G_FreeEdict;
+	gi.linkentity(element);
 }
 
 

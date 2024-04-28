@@ -516,6 +516,7 @@ void monster_death_use (edict_t *self)
 	if (self->item)
 	{
 		Drop_Item (self, self->item);
+		
 		self->item = NULL;
 	}
 

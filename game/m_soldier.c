@@ -1158,12 +1158,16 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	}
 
 	if (self->deadflag == DEAD_DEAD)
+		self->item = FindItem("ammo_cells");
 		return;
 
 // regular death
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->s.skinnum |= 1;
+
+	// TODO: Run Quake 2 and see if this line below works
+	//Drop_Item(self, FindItemByClassname(st.item));
 
 	if (self->s.skinnum == 1)
 		gi.sound (self, CHAN_VOICE, sound_death_light, 1, ATTN_NORM, 0);
