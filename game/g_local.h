@@ -116,7 +116,8 @@ typedef enum
 	AMMO_SLUGS
 } ammo_t;
 
-// Element pickup
+
+// Element pickup def
 typedef enum
 {
 	ELEMENT_NORMAL,
@@ -228,6 +229,11 @@ typedef struct
 	int		armor;
 } gitem_armor_t;
 
+// Chest Loot def
+typedef struct {
+	char* item_name;
+	float probabitlity;
+} loot_t;
 
 // gitem_t->flags
 #define	IT_WEAPON		1		// use makes active weapon
@@ -721,6 +727,7 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type);
 void ThrowClientHead (edict_t *self, int damage);
 void ThrowGib (edict_t *self, char *gibname, int damage, int type);
 void BecomeExplosion1(edict_t *self);
+void SP_item_chest(edict_t* self);
 
 //
 // g_ai.c

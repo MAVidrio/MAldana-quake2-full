@@ -437,6 +437,15 @@ void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	element->nextthink = level.time + 120;
 	element->think = G_FreeEdict;
 	gi.linkentity(element);
+
+	edict_t* new_enemy;
+	new_enemy = G_Spawn();
+	new_enemy->classname = "monster_soldier";
+
+	VectorCopy(self->s.origin, new_enemy->s.origin);
+	new_enemy->s.origin[2] += 20;
+
+	ED_CallSpawn(new_enemy);
 }
 
 

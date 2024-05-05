@@ -428,8 +428,6 @@ void monster_think (edict_t *self)
 	M_WorldEffects (self);
 	M_SetEffects (self);
 }
-
-
 /*
 ================
 monster_use

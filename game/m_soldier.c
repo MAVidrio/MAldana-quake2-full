@@ -1301,3 +1301,4 @@ void SP_monster_soldier_ss (edict_t *self)
 	self->health = 40;
 	self->gib_health = -30;
 }
+

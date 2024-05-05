@@ -39,6 +39,7 @@ void Weapon_BFG (edict_t *ent);
 gitem_armor_t jacketarmor_info	= { 25,  50, .30, .00, ARMOR_JACKET};
 gitem_armor_t combatarmor_info	= { 50, 100, .60, .30, ARMOR_COMBAT};
 gitem_armor_t bodyarmor_info	= {100, 200, .80, .60, ARMOR_BODY};
+loot_t loot_table[] = { {"Shotgun", 0.1}, {"Health", 0.2}, {"Armor", 0.4}, {"Power-up", 0.7}, {"Special Item", 1.0} };
 
 static int	jacket_armor_index;
 static int	combat_armor_index;
@@ -112,6 +113,16 @@ gitem_t	*FindItem (char *pickup_name)
 	}
 
 	return NULL;
+}
+
+void drop_loot(edict_t* self) {
+	float roll = random();
+	for (int i = 0; i < sizeof(loot_table) / sizeof(loot_table[0]); i++) {
+		if (roll < loot_table[i].probabitlity) {
+			SpawnItem(self, FindItem(loot_table[i].item_name));
+			break;
+		}
+	}
 }
 
 //======================================================================
