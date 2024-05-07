@@ -340,6 +340,26 @@ void M_SetEffects (edict_t *ent)
 		ent->s.renderfx |= RF_SHELL_RED;
 	}
 
+	//ent->s.effects |= TE_SPARKS;
+	//ent->s.renderfx |= RF_SHELL_HALF_DAM;
+
+	if (ent->elementType == ELEMENT_FIRE) {
+		ent->s.effects |= EF_COLOR_SHELL;
+		ent->s.renderfx |= RF_SHELL_RED;
+	}
+	else if (ent->elementType == ELEMENT_ICE) {
+		ent->s.effects |= EF_COLOR_SHELL;
+		ent->s.renderfx |= RF_SHELL_BLUE;
+	}
+	else if (ent->elementType == ELEMENT_ELETRIC) {
+		ent->s.effects |= EF_COLOR_SHELL;
+		ent->s.renderfx |= RF_SHELL_GREEN;
+	}
+	else if (ent->elementType == ELEMENT_ROCK) {
+		ent->s.effects |= EF_COLOR_SHELL;
+		ent->s.renderfx |= RF_SHELL_HALF_DAM;
+	}
+
 	if (ent->health <= 0)
 		return;
 
@@ -354,6 +374,10 @@ void M_SetEffects (edict_t *ent)
 			ent->s.effects |= EF_COLOR_SHELL;
 			ent->s.renderfx |= RF_SHELL_GREEN;
 		}
+	}
+
+	if (ent->onFire) {
+		ent->s.effects |= TE_BLASTER;
 	}
 }
 
@@ -415,9 +439,89 @@ void M_MoveFrame (edict_t *self)
 		move->frame[index].thinkfunc (self);
 }
 
+void apply_fire(edict_t* self) {
+	if (!self->takedamage) return;
+
+	if (self->frozen) {
+		self->frozen = false;
+		self->stunTime = 0;
+		return;
+	}
+
+	if (self->elementType == ELEMENT_FIRE) {
+		return;
+	}
+
+	self->onFire = true;
+	self->onfireTime = level.time + 5.0;
+}
+
+void apply_freeze(edict_t* self, float duration) {
+	if (!self->takedamage) return;
+
+	if (self->frozen || self->shocked || self->elementType == ELEMENT_ICE || self->elementType == ELEMENT_FIRE) {
+		return;
+	}
+	self->frozen = true;
+	self->stunTime = level.time + duration;
+
+	gi.sound(self, CHAN_VOICE, gi.soundindex("misc/steam1.wav"), 1, ATTN_NORM, 0);
+}
+
+void apply_shock(edict_t* self, float duration) {
+	if (!self->takedamage) return;
+
+	if (self->frozen || self->shocked || self->elementType == ELEMENT_ELETRIC) {
+		return;
+	}
+	self->shocked = true;
+	self->stunTime = level.time + duration;
+
+	gi.sound(self, CHAN_VOICE, gi.soundindex("misc/spark2.wav"), 1, ATTN_NORM, 0);
+}
 
 void monster_think (edict_t *self)
 {
+	if (self->frozen) {
+		if (level.time > self->stunTime) {
+			gi.sound(self, CHAN_VOICE, gi.soundindex("sound/brkglas.wav"), 1, ATTN_NORM, 0);
+			self->frozen = false;
+			self->stunTime = 0;
+			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
+			//gi.dprintf("Debug: Unfreezing enemy.\n");
+		}
+		else {
+			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
+			//gi.dprintf("Enemy still frozen.\n StunTime: %f, LevelTime: %f\n", self->stunTime, level.time);
+		}
+	}
+	else if (self->shocked) {
+		if (level.time > self->stunTime) {
+			gi.sound(self, CHAN_VOICE, gi.soundindex("sound/spark1.wav"), 1, ATTN_NORM, 0);
+			self->shocked = false;
+			self->stunTime = 0;
+			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
+			//gi.dprintf("Debug: Unshocking enemy.\n");
+		}
+		else {
+			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
+			//gi.dprintf("Enemy still shocked.\n StunTime: %f, LevelTime: %f\n", self->stunTime, level.time);
+		}
+	}
+	else if (self->onFire) {
+		if (level.time > self->onfireTime) {
+			gi.sound(self, CHAN_VOICE, gi.soundindex("sound/steam1.wav"), 1, ATTN_NORM, 0);
+			self->onFire = false;
+			self->onfireTime = 0;
+			//gi.dprintf("Debug: Unshocking enemy.\n");
+		}
+		else {
+			self->health -= 1;
+			gi.sound(self, CHAN_VOICE, gi.soundindex("sound/lava1.wav"), 1, ATTN_NORM, 0);
+			gi.dprintf("Enemy still on fire.\n FireTime: %f, LevelTime: %f\n", self->onfireTime, level.time);
+		}
+	}
+
 	M_MoveFrame (self);
 	if (self->linkcount != self->monsterinfo.linkcount)
 	{
@@ -560,6 +664,24 @@ qboolean monster_start (edict_t *self)
 	self->s.skinnum = 0;
 	self->deadflag = DEAD_NO;
 	self->svflags &= ~SVF_DEADMONSTER;
+
+	
+	if (random() <= 0.6) {
+		self->elementType = ELEMENT_NORMAL;
+	}
+	else if (random() <= 0.7) {
+		self->elementType = ELEMENT_FIRE;
+	}
+	else if (random() <= 0.8) {
+		self->elementType = ELEMENT_ICE;
+	}
+	else if (random() <= 0.9) {
+		self->elementType = ELEMENT_ELETRIC;
+	}
+	else {
+		self->elementType = ELEMENT_ROCK;
+	}
+
 
 	if (!self->monsterinfo.checkattack)
 		self->monsterinfo.checkattack = M_CheckAttack;

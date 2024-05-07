@@ -923,6 +923,29 @@ void Cmd_PlayerList_f(edict_t *ent)
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
 
+// Changes the Element of the Weapons
+void Cmd_ChangeWeaponElement_f(edict_t* ent) {
+	weaponelement_t *currentElement = ent->client->pers.current_element;
+
+	if (currentElement == WEAPON_NORMAL) {
+		ent->client->pers.current_element = WEAPON_FIRES;
+		gi.cprintf(ent, PRINT_HIGH, "Element switched from Normal to Fire\n");
+	}else if (currentElement == WEAPON_FIRES){
+		ent->client->pers.current_element = WEAPON_ICE;
+		gi.cprintf(ent, PRINT_HIGH, "Element switched from Fire to Ice\n");
+	}else if (currentElement == WEAPON_ICE) {
+		ent->client->pers.current_element = WEAPON_ELETRIC;
+		gi.cprintf(ent, PRINT_HIGH, "Element switched from Ice to Eletric\n");
+	}else if (currentElement == WEAPON_ELETRIC) {
+		ent->client->pers.current_element = WEAPON_ROCK;
+		gi.cprintf(ent, PRINT_HIGH, "Element switched from Eletric to Rock\n");
+	}
+	else {
+		ent->client->pers.current_element = WEAPON_NORMAL;
+		gi.cprintf(ent, PRINT_HIGH, "Element switched from Rock to Normal\n");
+	}
+
+}
 
 /*
 =================
@@ -1013,6 +1036,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_PlayerList_f(ent);
 	else if (Q_stricmp(cmd, "spawn_chest") == 0)
 		Cmd_SpawnChest_f(ent);
+	else if (Q_stricmp(cmd, "change_element") == 0)
+		Cmd_ChangeWeaponElement_f(ent);
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }

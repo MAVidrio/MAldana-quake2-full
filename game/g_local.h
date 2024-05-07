@@ -100,7 +100,7 @@ typedef enum
 typedef enum
 {
 	WEAPON_NORMAL,
-	WEAPON_FIRE,
+	WEAPON_FIRES,
 	WEAPON_ICE,
 	WEAPON_ELETRIC,
 	WEAPON_ROCK
@@ -215,7 +215,8 @@ MOVETYPE_STEP,			// gravity, special edge handling
 MOVETYPE_FLY,
 MOVETYPE_TOSS,			// gravity
 MOVETYPE_FLYMISSILE,	// extra size to monsters
-MOVETYPE_BOUNCE
+MOVETYPE_BOUNCE,
+MOVETYPE_FLYRICOCHET
 } movetype_t;
 
 
@@ -284,9 +285,9 @@ typedef struct gitem_s
 	int			tag;
 
 	char		*precaches;		// string of all models, sounds, and images this item will use
+
+	weaponelement_t *weaponCElement;	// weapon's current element
 } gitem_t;
-
-
 
 //
 // this structure is left intact through an entire game
@@ -719,6 +720,9 @@ void M_CatagorizePosition (edict_t *ent);
 qboolean M_CheckAttack (edict_t *self);
 void M_FlyCheck (edict_t *self);
 void M_CheckGround (edict_t *ent);
+void apply_freeze(edict_t* self, float duration);
+void apply_shock(edict_t* self, float duration);
+void apply_fire(edict_t* self);
 
 //
 // g_misc.c
@@ -760,6 +764,17 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
 void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
 void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
+
+// Blaster Element projectiles
+void fire_eletric_blaster(edict_t* self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper);
+void fire_rock_blaster(edict_t* self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper);
+void fire_fire_blaster(edict_t* self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper);
+
+//Grenade Element projectiles
+void fire_ice_grenade(edict_t* self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
+
+// Hyperblaster Element projectiles
+void fire_hyperblaster_freeze(edict_t* self, vec3_t start, vec3_t aimdir, int damage, int kick);
 
 //
 // g_ptrail.c
@@ -888,6 +903,7 @@ typedef struct
 
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;
+	weaponelement_t *current_element;
 
 	int			power_cubes;	// used for tracking the cubes in coop games
 	int			score;			// for calculating total unit score in coop games
@@ -936,6 +952,8 @@ struct gclient_s
 	qboolean	weapon_thunk;
 
 	gitem_t		*newweapon;
+
+	weaponelement_t	currentElement;	// Player active element
 
 	// sum up damage over an entire frame, so
 	// shotgun blasts give a single big kick
@@ -1143,5 +1161,13 @@ struct edict_s
 	// common data blocks
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
+
+	// freeze and stun 
+	element_t elementType;
+	qboolean frozen;
+	qboolean shocked;
+	qboolean onFire;
+	float onfireTime;
+	float stunTime;
 };
 

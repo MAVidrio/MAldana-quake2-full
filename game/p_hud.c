@@ -380,6 +380,8 @@ void G_SetStats (edict_t *ent)
 	int			index, cells;
 	int			power_armor_type;
 
+	int element = ent->client->pers.current_element;
+
 	//
 	// health
 	//
@@ -400,14 +402,14 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (item->icon);
 		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
 	}
-	
+
 	//
 	// armor
 	//
-	power_armor_type = PowerArmorType (ent);
+	power_armor_type = PowerArmorType(ent);
 	if (power_armor_type)
 	{
-		cells = ent->client->pers.inventory[ITEM_INDEX(FindItem ("cells"))];
+		cells = ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))];
 		if (cells == 0)
 		{	// ran out of cells for power armor
 			ent->flags &= ~FL_POWER_ARMOR;
@@ -470,6 +472,25 @@ void G_SetStats (edict_t *ent)
 	{
 		ent->client->ps.stats[STAT_TIMER_ICON] = 0;
 		ent->client->ps.stats[STAT_TIMER] = 0;
+	}
+
+	//
+	//	Element
+	//
+	if (element == 0) {
+		ent->client->ps.stats[STAT_TIMER_ICON] = 0;
+	}
+	else if (element == 1) {
+		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_quad");
+	}
+	else if (element == 2) {
+		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_invulnerability");
+	}
+	else if (element == 3) {
+		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_envirosuit");
+	}
+	else if (element == 4) {
+		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_rebreather");
 	}
 
 	//
