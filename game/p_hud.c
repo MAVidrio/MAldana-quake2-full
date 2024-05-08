@@ -314,21 +314,32 @@ void HelpComputer (edict_t *ent)
 		sk = "hard+";
 
 	// send the layout
+	/*
 	Com_sprintf (string, sizeof(string),
 		"xv 32 yv 8 picn help "			// background
 		"xv 202 yv 12 string2 \"%s\" "		// skill
 		"xv 0 yv 24 cstring2 \"%s\" "		// level name
-		"xv 0 yv 54 cstring2 \"%s\" "		// help 1
-		"xv 0 yv 110 cstring2 \"%s\" "		// help 2
+		"xv 0 yv 54 cstring2 \"Press F to change elements.\nThere are 5 elements: \nNormal, Fire, Ice,\nEletric, and Rock.\" "		// help 1
+		"xv 0 yv 110 cstring2 \"Only blaster and hyperblaster\nhas elemental changes.\" "		// help 2
 		"xv 50 yv 164 string2 \" kills     goals    secrets\" "
 		"xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ", 
 		sk,
 		level.level_name,
-		game.helpmessage1,
-		game.helpmessage2,
+		//game.helpmessage1,
+		//game.helpmessage2,
 		level.killed_monsters, level.total_monsters, 
 		level.found_goals, level.total_goals,
-		level.found_secrets, level.total_secrets);
+		level.found_secrets, level.total_secrets);*/
+	Com_sprintf(string, sizeof(string), 
+		"xv 202 yv 12 string2 \"%s\" "		// skill
+		"xv 0 yv 24 cstring2 \"Welcome to my mod!\nHow to play:\" "		// level name
+		"xv 0 yv 54 cstring2 \"Press F to change your elements. There are 5 elements: \nNormal, Fire, Ice,Eletric, and Rock.\nEnemy will also have elements.\" "		// help 1
+		"xv 0 yv 110 cstring2 \"They are highlighted in a colored shield and are resistant to certain elements.\n(WARNING: Do not switch elements while firing!)\" ",		// help 2
+		"xv 50 yv 164 string2 \"(WARNING: Do not switch elements while firing weapons! It will disable your weapons.)\" ",	// help 1
+		sk);
+		//game.helpmessage1,
+		//game.helpmessage2,
+		
 
 	gi.WriteByte (svc_layout);
 	gi.WriteString (string);
@@ -380,6 +391,8 @@ void G_SetStats (edict_t *ent)
 	int			index, cells;
 	int			power_armor_type;
 
+	int element = ent->client->pers.current_element;
+
 	//
 	// health
 	//
@@ -400,14 +413,14 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (item->icon);
 		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
 	}
-	
+
 	//
 	// armor
 	//
-	power_armor_type = PowerArmorType (ent);
+	power_armor_type = PowerArmorType(ent);
 	if (power_armor_type)
 	{
-		cells = ent->client->pers.inventory[ITEM_INDEX(FindItem ("cells"))];
+		cells = ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))];
 		if (cells == 0)
 		{	// ran out of cells for power armor
 			ent->flags &= ~FL_POWER_ARMOR;
@@ -446,6 +459,7 @@ void G_SetStats (edict_t *ent)
 	//
 	// timers
 	//
+	/*
 	if (ent->client->quad_framenum > level.framenum)
 	{
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_quad");
@@ -470,6 +484,25 @@ void G_SetStats (edict_t *ent)
 	{
 		ent->client->ps.stats[STAT_TIMER_ICON] = 0;
 		ent->client->ps.stats[STAT_TIMER] = 0;
+	}*/
+
+	//
+	//	Element
+	//
+	if (element == 0) {
+		ent->client->ps.stats[STAT_TIMER_ICON] = 0;
+	}
+	else if (element == 1) {
+		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_quad");
+	}
+	else if (element == 2) {
+		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_invulnerability");
+	}
+	else if (element == 3) {
+		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_envirosuit");
+	}
+	else if (element == 4) {
+		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_rebreather");
 	}
 
 	//

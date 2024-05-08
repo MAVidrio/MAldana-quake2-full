@@ -1188,6 +1188,67 @@ void SP_monster_commander_body (edict_t *self)
 	self->nextthink = level.time + 5 * FRAMETIME;
 }
 
+// Chest stuff
+
+// Chest Thinking and opening the chest
+void chest_think(edict_t* self) {
+	if (!self) {
+		gi.dprintf("SP_item_chest called with NULL self.\n");
+		return;
+	}
+	// If the chest is a mimic
+	if (random() < 0.1) {
+		float enemyType = random();
+		edict_t* enemy = G_Spawn();
+		VectorCopy(self->s.origin, enemy->s.origin);
+
+		if (enemyType < 0.5) {
+			enemy->classname = "monster_mutant";
+		}
+		else if (enemyType < 0.8) {
+			enemy->classname = "monster_boss";
+		}
+		else {
+			enemy->classname = "monster_gladiator";
+		}
+
+		G_Spawn(enemy);
+	}
+	// If it's not a mimic
+	else {
+		drop_loot(self);
+	}
+
+	// Despawn itself
+	G_FreeEdict(self);
+}
+
+void chest_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) {
+	if (!other->client)
+		return;
+
+	self->think(self);
+}
+
+void SP_item_chest(edict_t* self) {
+	if (!self) {
+		gi.dprintf("SP_item_chest called with NULL self.\n");
+		return;
+	}
+	self->movetype = MOVETYPE_STEP;
+	self->solid = SOLID_BBOX;
+	self->model = gi.modelindex("models/items/pack/tris.md2");
+	if (!self->model) {
+		gi.dprintf("Failed to load chest model.\n");
+		G_FreeEdict(self);
+		return;
+	}
+	self->touch = chest_touch;
+	self->think = chest_think;
+	self->nextthink = level.time + 0.1;
+	gi.linkentity(self);
+}
+
 
 /*QUAKED misc_banner (1 .5 0) (-4 -4 -4) (4 4 4)
 The origin is the bottom of the banner.

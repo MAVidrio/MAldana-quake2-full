@@ -753,7 +753,16 @@ char *dm_statusbar =
 "	xv	296 "
 "	pic	9 "
 "endif "
-
+/*
+// Element icon
+"if 18 "	
+"	yb -72 "
+"   xr -58 "
+"	num	2	19 "
+"	xr -24 "
+"	pic	18 "
+"endif "
+*/
 //  help / weapon icon 
 "if 11 "
 "	xv	148 "

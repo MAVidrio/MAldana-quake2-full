@@ -615,6 +615,7 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.inventory[client->pers.selected_item] = 1;
 
 	client->pers.weapon = item;
+	client->pers.current_element = WEAPON_NORMAL;
 
 	client->pers.health			= 100;
 	client->pers.max_health		= 100;
@@ -625,6 +626,13 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.max_grenades	= 50;
 	client->pers.max_cells		= 200;
 	client->pers.max_slugs		= 50;
+
+	// Element
+	client->pers.max_normal		= 10;
+	client->pers.max_fire		= 10;
+	client->pers.max_ice		= 10;
+	client->pers.max_electric	= 10;
+	client->pers.max_rock		= 10;
 
 	client->pers.connected = true;
 }

@@ -339,8 +339,6 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 	ent->client->newweapon = item;
 }
 
-
-
 /*
 ================
 Drop_Weapon
@@ -553,6 +551,8 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 	int		speed;
 	float	radius;
 
+	weaponelement_t* element = ent->client->pers.current_element;
+
 	radius = damage+40;
 	if (is_quad)
 		damage *= 4;
@@ -563,7 +563,16 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 
 	timer = ent->client->grenade_time - level.time;
 	speed = GRENADE_MINSPEED + (GRENADE_TIMER - timer) * ((GRENADE_MAXSPEED - GRENADE_MINSPEED) / GRENADE_TIMER);
-	fire_grenade2 (ent, start, forward, damage, speed, timer, radius, held);
+	if (element == WEAPON_FIRES) {
+		fire_grenade2 (ent, start, forward, damage-20, speed, timer, 185, held);
+	}
+	else if (element == WEAPON_ICE) {
+		fire_ice_grenade(ent, start, forward, damage-50, speed, timer, 200, held);
+	}
+	else {
+		fire_grenade2(ent, start, forward, damage, speed, timer, radius, held);
+	}
+	
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -819,6 +828,8 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	vec3_t	start;
 	vec3_t	offset;
 
+	//gi.centerprintf(ent->client, "Press F to change element");
+
 	if (is_quad)
 		damage *= 4;
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -829,8 +840,37 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
+	weaponelement_t* element = ent->client->pers.current_element;
 
+	//gi.cprintf(ent, PRINT_HIGH, "Current element is %d\n", element);
+
+	if (element == WEAPON_NORMAL) {
+		fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
+	}
+	else if (element == WEAPON_FIRES) {
+		fire_fire_blaster(ent, start, forward, 7, 1000, EF_ROCKET, hyper);
+
+		start[0] += right[0] * 10;
+		start[1] += right[1] * 10;
+		start[2] += right[2] * 10;
+		fire_fire_blaster(ent, start, forward, 5, 1000, EF_ROCKET, hyper);
+
+		start[0] -= right[0] * 20;
+		start[1] -= right[1] * 20;
+		start[2] -= right[2] * 20;
+		fire_fire_blaster(ent, start, forward, 5, 1000, EF_ROCKET, hyper);
+	}
+	else if (element == WEAPON_ICE) {
+		fire_blaster(ent, start, forward, 7, 800, EF_FLAG2, hyper);
+	}
+	else if (element == WEAPON_ELETRIC) {
+		//fire_blaster(ent, start, forward, 5, 1000, EF_TAGTRAIL, hyper);
+		fire_eletric_blaster(ent, start, forward, 5, 2000, EF_TAGTRAIL, hyper);
+	}
+	else {
+		fire_rock_blaster(ent, start, forward, 25, 800, EF_GRENADE, hyper);
+	}
+	
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -843,8 +883,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 }
 
-
-void Weapon_Blaster_Fire (edict_t *ent)
+void Weapon_Blaster_Fire (edict_t *ent, weaponelement_t *currentElement)
 {
 	int		damage;
 
@@ -852,18 +891,81 @@ void Weapon_Blaster_Fire (edict_t *ent)
 		damage = 15;
 	else
 		damage = 10;
+
 	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
 	ent->client->ps.gunframe++;
 }
 
-void Weapon_Blaster (edict_t *ent)
+void Weapon_Blaster (edict_t *ent, weaponelement_t *wele)
 {
 	static int	pause_frames[]	= {19, 32, 0};
 	static int	fire_frames[]	= {5, 0};
 
-	Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
+
+	// TODO: Change this so that depending on the element, the fire rate and element changes.
+	weaponelement_t* element = ent->client->pers.current_element;
+
+	if (element == WEAPON_ICE) {
+		Weapon_Generic(ent, 4, 12, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
+	}
+	else if (element == WEAPON_ELETRIC) {
+		Weapon_Generic(ent, 4, 5, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
+	}
+	else if (element == WEAPON_ROCK) {
+		Weapon_Generic(ent, 4, 12, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
+	}
+	else {
+		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
+	}
+	
 }
 
+void weapon_HyperBlaster_ice_beam(edict_t* ent)
+{
+	vec3_t		start;
+	vec3_t		forward, right;
+	vec3_t		offset;
+	int			damage;
+	int			kick;
+
+	if (deathmatch->value)
+	{	// normal damage is too extreme in dm
+		damage = 100;
+		kick = 200;
+	}
+	else
+	{
+		damage = 8;
+		kick = 250;
+	}
+
+	if (is_quad)
+	{
+		damage *= 4;
+		kick *= 4;
+	}
+
+	AngleVectors(ent->client->v_angle, forward, right, NULL);
+
+	VectorScale(forward, -3, ent->client->kick_origin);
+	ent->client->kick_angles[0] = -3;
+
+	VectorSet(offset, 0, 7, ent->viewheight - 8);
+	P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+	fire_hyperblaster_freeze(ent, start, forward, damage, kick);
+
+	// send muzzle flash
+	gi.WriteByte(svc_muzzleflash);
+	gi.WriteShort(ent - g_edicts);
+	gi.WriteByte(MZ_RAILGUN | is_silenced);
+	gi.multicast(ent->s.origin, MULTICAST_PVS);
+
+	ent->client->ps.gunframe++;
+	PlayerNoise(ent, start, PNOISE_WEAPON);
+
+	if (!((int)dmflags->value & DF_INFINITE_AMMO))
+		ent->client->pers.inventory[ent->client->ammo_index]--;
+}
 
 void Weapon_HyperBlaster_Fire (edict_t *ent)
 {
@@ -904,7 +1006,16 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 				damage = 15;
 			else
 				damage = 20;
-			Blaster_Fire (ent, offset, damage, true, effect);
+
+			weaponelement_t* element = ent->client->pers.current_element;
+
+			if (element == WEAPON_ICE) {
+				//
+			}
+			else {
+				Blaster_Fire (ent, offset, damage, true, effect);
+			}
+
 			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]--;
 
@@ -938,8 +1049,19 @@ void Weapon_HyperBlaster (edict_t *ent)
 {
 	static int	pause_frames[]	= {0};
 	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 0};
+	static int	ice_frames[]	= {6, 7, 8, 0 };
 
-	Weapon_Generic (ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);
+	weaponelement_t* element = ent->client->pers.current_element;
+
+	if (element == WEAPON_ICE) {
+		Weapon_Generic(ent, 5, 20, 49, 53, pause_frames, ice_frames, weapon_HyperBlaster_ice_beam);
+	}
+	else if (element == WEAPON_ELETRIC) {
+		Weapon_Generic(ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);
+	}
+	else {
+		Weapon_Generic(ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);
+	}
 }
 
 /*
