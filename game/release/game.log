@@ -2,7 +2,7 @@
   p_hud.c
 C:\Users\migue\.ssh\MAldana-quake2-full\game\p_hud.c(234,4): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 C:\Users\migue\.ssh\MAldana-quake2-full\game\p_hud.c(245,3): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\migue\.ssh\MAldana-quake2-full\game\p_hud.c(383,6): warning C4047: 'initializing': 'int' differs in levels of indirection from 'weaponelement_t *'
-C:\Users\migue\.ssh\MAldana-quake2-full\game\p_hud.c(425): warning C4701: potentially uninitialized local variable 'cells' used
+C:\Users\migue\.ssh\MAldana-quake2-full\game\p_hud.c(394,6): warning C4047: 'initializing': 'int' differs in levels of indirection from 'weaponelement_t *'
+C:\Users\migue\.ssh\MAldana-quake2-full\game\p_hud.c(436): warning C4701: potentially uninitialized local variable 'cells' used
      Creating library .\..\release\gamex86.lib and object .\..\release\gamex86.exp
   game.vcxproj -> C:\Program Files (x86)\Steam\steamapps\common\Quake 2\slasher\gamex86.dll

@@ -828,7 +828,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	vec3_t	start;
 	vec3_t	offset;
 
-	gi.centerprintf(ent->client, "Press F to change element");
+	//gi.centerprintf(ent->client, "Press F to change element");
 
 	if (is_quad)
 		damage *= 4;
@@ -842,7 +842,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 
 	weaponelement_t* element = ent->client->pers.current_element;
 
-	gi.cprintf(ent, PRINT_HIGH, "Current element is %d\n", element);
+	//gi.cprintf(ent, PRINT_HIGH, "Current element is %d\n", element);
 
 	if (element == WEAPON_NORMAL) {
 		fire_blaster (ent, start, forward, damage, 1000, effect, hyper);

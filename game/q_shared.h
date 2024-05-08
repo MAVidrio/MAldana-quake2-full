@@ -1008,8 +1008,8 @@ typedef enum
 #define	STAT_FLASHES			15		// cleared each frame, 1 = health, 2 = armor
 #define STAT_CHASE				16
 #define STAT_SPECTATOR			17
-#define STAT_ELEMENT_ICON		18
-#define STAT_ELEMENT			19
+//#define STAT_ELEMENT_ICON		18
+//#define STAT_ELEMENT			19
 
 #define	MAX_STATS				32
 
@@ -1187,7 +1187,7 @@ typedef struct
 
 	int			rdflags;		// refdef flags
 
-	int			currentElement;	// Manages the players element
+	//int			currentElement;	// Manages the players element
 
 	short		stats[MAX_STATS];		// fast status bar updates
 } player_state_t;
