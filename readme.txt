@@ -1,3 +1,21 @@
+HOWTOINSTALL:
+
+1. Clone the repository.
+2. Open quake2.sln in Visual Studio.
+3. Set game as startup solution.
+4. Change debug to Release and make sure you have Win32.
+5. Build the game.
+6. Open quake2-full/game/release and find gamex86.dll file.
+7. Open your local folder for your instalation of Quake 2.
+8. Create a new folder (name does not matter).
+9. Move gamex86.dll from the modded quake 2 game to the new folder.
+10. Run Quake 2 original.
+11. Open console using '~' key.
+12. Type "set game <name of new folder>" and press enter.
+
+Last step should run the modded version of Quake 2.
+
+==============================================================================================================
 
 This is the complete source code for Quake 2, version 3.19, buildable with
 visual C++ 6.0.  The linux version should be buildable, but we haven't
